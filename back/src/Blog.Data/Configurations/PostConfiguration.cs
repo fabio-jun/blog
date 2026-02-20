@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Blog.Data.Configurations;
 
+// Como POST é mapeado no BD
 public class PostConfiguration : IEntityTypeConfiguration<Post>
 {
     public void Configure(EntityTypeBuilder<Post> builder)
@@ -38,6 +39,7 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
          builder.Property(p => p.UpdatedAt)
               .IsRequired(false);  // Nullable
 
+            //Índice único
           builder.HasIndex(p => p.Slug)
               .IsUnique()
               .HasDatabaseName("IX_Posts_Slug");
