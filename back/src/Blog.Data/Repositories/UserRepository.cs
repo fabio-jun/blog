@@ -1,5 +1,4 @@
 //Encapsulate the access to the DB
-
 using Blog.Domain.Entities;
 using Blog.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;

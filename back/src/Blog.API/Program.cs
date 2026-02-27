@@ -1,7 +1,13 @@
+using System.Text;
+using Blog.API.Middlewares;
 using Blog.Data;
 using Blog.Data.Repositories;
 using Blog.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore; //Para UseNpgsql e AddDbContext
+using Blog.Service.Interfaces;
+using Blog.Service.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 //Cria o construtor da aplicação, carrega appsettings.json, variáveis de ambiente, etc
 var builder = WebApplication.CreateBuilder(args);
@@ -15,22 +21,48 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
       options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//Registra o suporte a Swagger      
-builder.Services.AddOpenApi();
+//Registra o suporte a Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+      .AddJwtBearer(options =>
+      {
+          options.TokenValidationParameters = new TokenValidationParameters
+          {
+              ValidateIssuer = true,
+              ValidateAudience = true,
+              ValidateLifetime = true,
+              ValidateIssuerSigningKey = true,
+              ValidIssuer = builder.Configuration["Jwt:Issuer"],
+              ValidAudience = builder.Configuration["Jwt:Audience"],
+              IssuerSigningKey = new SymmetricSecurityKey(
+                  Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+          };
+      });
 
 // Cria uma nova instância por HTTP Request
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 //Constroi a aplicação
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

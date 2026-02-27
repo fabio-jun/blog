@@ -20,7 +20,10 @@ public class AppDbContext : DbContext
     //Apply the entities's classes configurations
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Calls the original implementation from the father class
         base.OnModelCreating(modelBuilder);
+        //Automatically searches for all the classes that implement IEntityTypeConfiguration<T> in the
+        //project and applies
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }
