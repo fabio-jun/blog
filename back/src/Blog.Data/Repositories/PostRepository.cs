@@ -26,13 +26,17 @@ public class PostRepository : IPostRepository
     public async Task<Post?> GetBySlugAsync(string slug)
     {
         // SELECT * FROM "Posts" WHERE "Slug" = ...
-        return await _context.Posts.FirstOrDefaultAsync( p => p.Slug == slug);
+        return await _context.Posts
+            .Include(p => p.Author)
+            .FirstOrDefaultAsync( p => p.Slug == slug);
     }
 
     public async Task<Post?> GetByIdAsync(int id)
     {
         // SELECT * FROM "Posts" WHERE "Id" = ...
-        return await _context.Posts.FindAsync(id);
+        return await _context.Posts
+        .Include(p => p.Author)
+        .FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task AddAsync(Post post)
