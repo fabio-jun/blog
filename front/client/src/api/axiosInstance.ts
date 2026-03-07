@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Creates an acios instance with fixed based URL, to avoid repeating the base URL in all requests
 const api = axios.create({
-    baseURL: "http://localhost:5073/api",
+    baseURL: "http://localhost:5071/api",
 });
 
 // Interceptor: adds the token in all requests automatically

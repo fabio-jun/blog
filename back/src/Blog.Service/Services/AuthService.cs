@@ -34,7 +34,11 @@ public class AuthService : IAuthService
     {
         var existingUser = await _userRepository.GetByEmailAsync(request.Email);
         if (existingUser != null)
-            throw new Exception("Email already registered.");
+            throw new ArgumentException("Email already registered.");
+
+        var existingUserName = await _userRepository.GetByUserNameAsync(request.UserName);
+        if (existingUserName != null)
+            throw new ArgumentException("Username already taken.");
 
         var user = new User
         {
@@ -55,7 +59,7 @@ public class AuthService : IAuthService
     {
         var user = await _userRepository.GetByEmailAsync(request.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            throw new Exception("Email ou senha inválidos.");
+            throw new ArgumentException("Email ou senha inválidos.");
         //Generates tokens
         return await GenerateAuthResponse(user);
     }
@@ -65,7 +69,7 @@ public class AuthService : IAuthService
     {
         var token = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
         if (token == null || token.IsRevoked || token.ExpiresAt < DateTime.UtcNow)
-            throw new Exception("Invalid refresh token.");
+            throw new ArgumentException("Invalid refresh token.");
 
         // Revokes old token
         token.IsRevoked = true;
