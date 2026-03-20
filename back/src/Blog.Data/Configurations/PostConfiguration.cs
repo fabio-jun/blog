@@ -4,18 +4,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Blog.Data.Configurations;
 
-// Como POST é mapeado no BD
+// How post is maped at the DB
 public class PostConfiguration : IEntityTypeConfiguration<Post>
 {
     public void Configure(EntityTypeBuilder<Post> builder)
     {
-        //Table name
+        // Table name
         builder.ToTable("Posts");
 
-        //PK
+        // PK
         builder.HasKey(p => p.Id);
 
-        //Properties
+        // Properties
         builder.Property(p => p.Title)
             .IsRequired()
             .HasMaxLength(200);

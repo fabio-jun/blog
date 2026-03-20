@@ -11,6 +11,7 @@ public class Post
     public DateTime? UpdatedAt { get; set; }
     public User? Author { get; set; }
     public int AuthorId { get; set; }
+    public ICollection<Comment>? Comments { get; set; }
     
 
 

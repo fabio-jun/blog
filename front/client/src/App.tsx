@@ -3,7 +3,8 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import PostPage from "./pages/PostPage";
-import LoginPage from "./pages/LoginPage";                                                                                        import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";                                                                                        
+import RegisterPage from "./pages/RegisterPage";
 
 export default function App() {
   return (

@@ -62,7 +62,12 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IPostRepository, PostRepository>();
+
 builder.Services.AddScoped<IPostService, PostService>();
+
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 //Constroi a aplicação
 var app = builder.Build();

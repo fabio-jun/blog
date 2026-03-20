@@ -12,11 +12,14 @@ public class RefreshTokenRepository: IRefreshTokenRepository
     {
         _context = context;
     }
+
+    // Searches for a refresh token in the database that matches the provided token
     public async Task<RefreshToken?>GetByTokenAsync(string token)
     {
         return await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == token);
     }
-
+    
+    // Saves the new refresh token in the DB and persists with SaveChangesAsync()
     public async Task AddAsync(RefreshToken refreshToken)
     {
         await _context.RefreshTokens.AddAsync(refreshToken);

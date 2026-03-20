@@ -21,7 +21,6 @@ public class AuthController : ControllerBase
 
     //Attribute that defines the following method answers to HTTP POST at route api/auth/register
     [HttpPost("register")]
-
     public async Task<IActionResult> Register(RegisterRequest request)
     {
         //Calls the RegisterAsync method from the service
