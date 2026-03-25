@@ -13,55 +13,41 @@ public class PostRepository : IPostRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Post>> GetAllPublishedAsync()
+    // Returns all posts ordered by most recent first
+    public async Task<IEnumerable<Post>> GetAllAsync()
     {
-        // SELECT * FROM "Posts"
-        return await _context.Posts
-        .Where(p => p.IsPublished)
-        .Include(p => p.Author)
-        .ToListAsync()
-        ;
-    }
-
-    public async Task<Post?> GetBySlugAsync(string slug)
-    {
-        // SELECT * FROM "Posts" WHERE "Slug" = ...
         return await _context.Posts
             .Include(p => p.Author)
-            .FirstOrDefaultAsync( p => p.Slug == slug);
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
     }
 
+    // Returns a single post by ID
     public async Task<Post?> GetByIdAsync(int id)
     {
-        // SELECT * FROM "Posts" WHERE "Id" = ...
         return await _context.Posts
-        .Include(p => p.Author)
-        .FirstOrDefaultAsync(p => p.Id == id);
+            .Include(p => p.Author)
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
 
+    // Inserts a new post
     public async Task AddAsync(Post post)
     {
-        // INSERT INTO "Posts"...
         await _context.Posts.AddAsync(post);
         await _context.SaveChangesAsync();
     }
 
+    // Updates an existing post
     public async Task UpdateAsync(Post post)
     {
-        // SELECT * FROM "Posts" WHERE Id = @id
         _context.Posts.Update(post);
         await _context.SaveChangesAsync();
     }
 
+    // Deletes a post
     public async Task DeleteAsync(Post post)
     {
-        // DELETE FROM "Posts" SET ...
         _context.Posts.Remove(post);
         await _context.SaveChangesAsync();
     }
-
-
-
-
-    
 }

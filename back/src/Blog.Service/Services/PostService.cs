@@ -7,104 +7,93 @@ namespace Blog.Service.Services;
 
 public class PostService : IPostService
 {
-
-    //External dependency field used for dependency injection
+    // External dependency field used for dependency injection
     private readonly IPostRepository _postRepository;
 
-    //Constructor: DI
+    // Constructor: DI
     public PostService(IPostRepository postRepository)
     {
         _postRepository = postRepository;
     }
 
-    public async Task<IEnumerable<PostResponse>> GetAllPublishedAsync()
+    // Returns all posts (most recent first)
+    public async Task<IEnumerable<PostResponse>> GetAllAsync()
     {
-        var posts = await _postRepository.GetAllPublishedAsync();
+        var posts = await _postRepository.GetAllAsync();
 
-        // Iterates each post and converts it to a PostResponse DTO
-        // LINQ -.Select(): extension method from LINQ that transforms each element from a collection
-        // Object Initializer - new PostResponse{ ... }: creates an object and define its properties without the need of an constructor with parameters
         return posts.Select(post => new PostResponse
         {
             Id = post.Id,
-            Title = post.Title,
             Content = post.Content,
-            Slug = post.Slug,
-            IsPublished = post.IsPublished,
             CreatedAt = post.CreatedAt,
+            UpdatedAt = post.UpdatedAt,
             AuthorId = post.AuthorId,
-            AuthorName = post.Author?.UserName ?? string.Empty
+            AuthorName = post.Author?.UserName ?? string.Empty,
+            ImageUrl = post.ImageUrl
         });
     }
 
-    public async Task<PostResponse> GetBySlugAsync(string slug)
+    // Returns a single post by ID
+    public async Task<PostResponse> GetByIdAsync(int id)
     {
-        var post = await _postRepository.GetBySlugAsync(slug);
+        var post = await _postRepository.GetByIdAsync(id);
         if (post == null)
-        {
-            throw new KeyNotFoundException("Post not found");
-        }
+            throw new KeyNotFoundException("Post not found.");
 
         return new PostResponse
         {
             Id = post.Id,
-            Title = post.Title,
             Content = post.Content,
-            Slug = post.Slug,
-            IsPublished = post.IsPublished,
             CreatedAt = post.CreatedAt,
+            UpdatedAt = post.UpdatedAt,
             AuthorId = post.AuthorId,
-            AuthorName = post.Author?.UserName ?? string.Empty
+            AuthorName = post.Author?.UserName ?? string.Empty,
+            ImageUrl = post.ImageUrl
         };
     }
 
+    // Creates a new post (max 280 characters)
     public async Task<PostResponse> CreateAsync(CreatePostRequest request, int authorId)
     {
+        if (request.Content.Length > 280)
+            throw new ArgumentException("Post must be 280 characters or less.");
+
         var post = new Post
         {
-            Title = request.Title,
             Content = request.Content,
-            Slug = GenerateSlug(request.Title),
-            IsPublished = request.IsPublished,
             CreatedAt = DateTime.UtcNow,
-            AuthorId = authorId
+            AuthorId = authorId,
+            ImageUrl = request.ImageUrl
         };
 
-        // Save at the DB
         await _postRepository.AddAsync(post);
 
-        // Converts the entity back to DTO and returns 
         return new PostResponse
         {
             Id = post.Id,
-            Title = post.Title,
             Content = post.Content,
-            Slug = post.Slug,
-            IsPublished = post.IsPublished,
             CreatedAt = post.CreatedAt,
             AuthorId = post.AuthorId,
-            AuthorName = string.Empty
+            AuthorName = string.Empty,
+            ImageUrl = post.ImageUrl
         };
     }
 
+    // Updates a post (author or admin only)
     public async Task<PostResponse> UpdateAsync(int postId, UpdatePostRequest request, int userId, string userRole)
     {
         var post = await _postRepository.GetByIdAsync(postId);
-
-        if(post == null)
-        {
+        if (post == null)
             throw new KeyNotFoundException("Post not found.");
-        }
-        
-        if(post.AuthorId != userId && userRole != "Admin")
-        {
-            throw new KeyNotFoundException("Not authorized.");
-        }
 
-        post.Title = request.Title;
+        if (post.AuthorId != userId && userRole != "Admin")
+            throw new UnauthorizedAccessException("Not authorized.");
+
+        if (request.Content.Length > 280)
+            throw new ArgumentException("Post must be 280 characters or less.");
+
         post.Content = request.Content;
-        post.Slug = GenerateSlug(request.Title);
-        post.IsPublished = request.IsPublished;
+        post.ImageUrl = request.ImageUrl;
         post.UpdatedAt = DateTime.UtcNow;
 
         await _postRepository.UpdateAsync(post);
@@ -112,39 +101,25 @@ public class PostService : IPostService
         return new PostResponse
         {
             Id = post.Id,
-            Title = post.Title,
             Content = post.Content,
-            Slug = post.Slug,
-            IsPublished = post.IsPublished,
             CreatedAt = post.CreatedAt,
+            UpdatedAt = post.UpdatedAt,
             AuthorId = post.AuthorId,
-            AuthorName = post.Author?.UserName ?? string.Empty
-        };  
+            AuthorName = post.Author?.UserName ?? string.Empty,
+            ImageUrl = post.ImageUrl
+        };
     }
 
+    // Deletes a post (author or admin only)
     public async Task DeleteAsync(int postId, int userId, string userRole)
     {
         var post = await _postRepository.GetByIdAsync(postId);
-        if(post == null)
-        {
+        if (post == null)
             throw new KeyNotFoundException("Post not found.");
-        }
 
-        if(post.AuthorId != userId && userRole != "Admin")
-        {
-            throw new KeyNotFoundException("Not authorized.");
-        }
+        if (post.AuthorId != userId && userRole != "Admin")
+            throw new UnauthorizedAccessException("Not authorized.");
 
         await _postRepository.DeleteAsync(post);
     }
-
-    private string GenerateSlug(string title)
-    {
-      return title
-          .ToLower()
-          .Replace(" ", "-")
-          .Replace("ã", "a").Replace("é", "e").Replace("í", "i").Replace("ó", "o").Replace("ú", "u")
-          .Replace("ç", "c").Replace("â", "a").Replace("ê", "e").Replace("ô", "o")
-          .Replace("à", "a");
-   }
 }

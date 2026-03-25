@@ -1,9 +1,8 @@
 namespace Blog.Service.DTOs.Posts;
 
+// DTO for creating a new post
 public class CreatePostRequest
 {
-    public required string Title { get; set; }
     public required string Content { get; set; }
-    public bool IsPublished { get; set; }
-    
+    public string? ImageUrl { get; set; }
 }

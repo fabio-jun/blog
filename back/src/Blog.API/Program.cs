@@ -56,18 +56,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 // Cria uma nova instância por HTTP Request
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
 builder.Services.AddScoped<IAuthService, AuthService>();
-
 builder.Services.AddScoped<IPostRepository, PostRepository>();
-
 builder.Services.AddScoped<IPostService, PostService>();
-
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 //Constroi a aplicação
 var app = builder.Build();
@@ -88,6 +83,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 
