@@ -17,6 +17,8 @@ public class AppDbContext : DbContext
     public DbSet<Post> Posts { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Comment> Comments { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+    public DbSet<PostTag> PostTags { get; set; }
 
     //Apply the entities's classes configurations
     protected override void OnModelCreating(ModelBuilder modelBuilder)

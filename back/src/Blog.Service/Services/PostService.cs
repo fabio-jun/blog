@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Blog.Domain.Entities;
 using Blog.Domain.Interfaces;
 using Blog.Service.DTOs.Posts;
@@ -7,13 +8,15 @@ namespace Blog.Service.Services;
 
 public class PostService : IPostService
 {
-    // External dependency field used for dependency injection
+    // External dependencies used for dependency injection
     private readonly IPostRepository _postRepository;
+    private readonly ITagRepository _tagRepository;
 
     // Constructor: DI
-    public PostService(IPostRepository postRepository)
+    public PostService(IPostRepository postRepository, ITagRepository tagRepository)
     {
         _postRepository = postRepository;
+        _tagRepository = tagRepository;
     }
 
     // Returns all posts (most recent first)
@@ -68,6 +71,9 @@ public class PostService : IPostService
 
         await _postRepository.AddAsync(post);
 
+        // Extract hashtags from content and associate them with the post
+        await ExtractAndSaveTags(post, request.Content);
+
         return new PostResponse
         {
             Id = post.Id,
@@ -96,7 +102,10 @@ public class PostService : IPostService
         post.ImageUrl = request.ImageUrl;
         post.UpdatedAt = DateTime.UtcNow;
 
+        // Clear old tag associations and extract new ones
+        post.PostTags?.Clear();
         await _postRepository.UpdateAsync(post);
+        await ExtractAndSaveTags(post, request.Content);
 
         return new PostResponse
         {
@@ -121,5 +130,34 @@ public class PostService : IPostService
             throw new UnauthorizedAccessException("Not authorized.");
 
         await _postRepository.DeleteAsync(post);
+    }
+
+    // Extracts hashtags from text and saves them as Tag + PostTag in the DB
+    private async Task ExtractAndSaveTags(Post post, string content)
+    {
+        var hashtags = Regex.Matches(content, @"#(\w+)")
+            .Select(m => m.Groups[1].Value.ToLower())
+            .Distinct()
+            .ToList();
+
+        foreach (var tagName in hashtags)
+        {
+            // Check if the tag already exists in the DB
+            var tag = await _tagRepository.GetByNameAsync(tagName);
+
+            // If not, create a new one
+            if (tag == null)
+            {
+                tag = new Tag { Name = tagName };
+                await _tagRepository.AddAsync(tag);
+            }
+
+            // Create the association between the post and the tag
+            post.PostTags ??= new List<PostTag>();
+            post.PostTags.Add(new PostTag { PostId = post.Id, TagId = tag.Id });
+        }
+
+        // Save the associations to the database
+        await _postRepository.UpdateAsync(post);
     }
 }
