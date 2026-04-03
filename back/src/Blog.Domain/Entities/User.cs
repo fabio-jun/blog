@@ -11,8 +11,7 @@ public class User
     public ICollection<Post>? Posts { get; set; }
     public ICollection<Comment>? Comments { get; set; }
     public ICollection<Like>? Likes { get; set; }
-    
-
-
+    public ICollection<Follow>? Followers { get; set; }
+    public ICollection<Follow>? Following { get; set; }
 
 }

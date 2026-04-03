@@ -1,5 +1,5 @@
-using Blog.Service.DTOs.Posts;
-using Blog.Service.Interfaces;
+using Blog.Application.DTOs.Posts;
+using Blog.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -21,19 +21,25 @@ public class PostController : ControllerBase
         _postService = postService;
     }
 
-    // GET api/post — public, returns all posts (most recent first)
+    // GET api/post — public, returns all posts with like info for the current user
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var posts = await _postService.GetAllAsync();
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        int? currentUserId = userIdClaim != null ? int.Parse(userIdClaim.Value) : null;
+
+        var posts = await _postService.GetAllAsync(currentUserId);
         return Ok(posts);
     }
 
-    // GET api/post/{id} — public, returns a single post
+    // GET api/post/{id} — public, returns a single post with like info for the current user
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var post = await _postService.GetByIdAsync(id);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        int? currentUserId = userIdClaim != null ? int.Parse(userIdClaim.Value) : null;
+
+        var post = await _postService.GetByIdAsync(id, currentUserId);
         return Ok(post);
     }
 

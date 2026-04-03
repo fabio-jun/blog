@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using Blog.Service.DTOs.Users;
-using Blog.Service.Interfaces;
+using Blog.Application.DTOs.Users;
+using Blog.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

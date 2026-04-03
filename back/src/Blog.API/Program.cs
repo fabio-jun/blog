@@ -1,10 +1,10 @@
 using System.Text;
 using Blog.API.Middlewares;
-using Blog.Data;
-using Blog.Data.Repositories;
+using Blog.Infrastructure;
+using Blog.Infrastructure.Repositories;
 using Blog.Domain.Interfaces;
-using Blog.Service.Interfaces;
-using Blog.Service.Services;
+using Blog.Application.Interfaces;
+using Blog.Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -65,6 +65,8 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+builder.Services.AddScoped<ILikeService, LikeService>();
 
 //Constroi a aplicação
 var app = builder.Build();

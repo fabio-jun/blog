@@ -1,5 +1,5 @@
-using Blog.Service.DTOs.Auth;
-using Blog.Service.Interfaces;
+using Blog.Application.DTOs.Auth;
+using Blog.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.API.Controllers;

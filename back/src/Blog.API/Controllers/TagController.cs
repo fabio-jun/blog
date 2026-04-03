@@ -1,5 +1,5 @@
-using Blog.Service.DTOs.Tags;
-using Blog.Service.Interfaces;
+using Blog.Application.DTOs.Tags;
+using Blog.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
