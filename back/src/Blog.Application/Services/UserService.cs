@@ -6,12 +6,13 @@ namespace Blog.Application.Services;
 
 public class UserService : IUserService
 {
-    // External dependency field used for DI
     private readonly IUserRepository _userRepository;
+    private readonly IFollowRepository _followRepository;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, IFollowRepository followRepository)
     {
         _userRepository = userRepository;
+        _followRepository = followRepository;
     }
 
     // Receives an usr ID and returns a userResponse DTO
@@ -23,15 +24,60 @@ public class UserService : IUserService
             throw new KeyNotFoundException("User not found.");
         }
 
-        //Converts the entity to a DTO
+        var followersCount = await _followRepository.GetFollowersCountAsync(user.Id);
+        var followingCount = await _followRepository.GetFollowingCountAsync(user.Id);
+
         return new UserResponse
         {
             Id = user.Id,
             UserName = user.UserName,
             Email = user.Email,
             Role = user.Role,
-            CreatedAt = user.CreatedAt
+            CreatedAt = user.CreatedAt,
+            ProfileImageUrl = user.ProfileImageUrl,
+            Bio = user.Bio,
+            FollowersCount = followersCount,
+            FollowingCount = followingCount
         };
+    }
+
+    public async Task<IEnumerable<UserResponse>> GetSuggestedAsync(int userId, int count)
+    {
+        var users = await _userRepository.GetSuggestedAsync(userId, count);
+        return users.Select(u => new UserResponse
+        {
+            Id = u.Id,
+            UserName = u.UserName,
+            Email = u.Email,
+            Role = u.Role,
+            CreatedAt = u.CreatedAt,
+            ProfileImageUrl = u.ProfileImageUrl,
+            Bio = u.Bio
+        });
+    }
+
+    // Searches users by username
+    public async Task<IEnumerable<UserResponse>> SearchAsync(string query)
+    {
+        var users = await _userRepository.SearchAsync(query);
+        var responses = new List<UserResponse>();
+
+        foreach (var user in users)
+        {
+            responses.Add(new UserResponse
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                Role = user.Role,
+                CreatedAt = user.CreatedAt,
+                Bio = user.Bio,
+                FollowersCount = await _followRepository.GetFollowersCountAsync(user.Id),
+                FollowingCount = await _followRepository.GetFollowingCountAsync(user.Id)
+            });
+        }
+
+        return responses;
     }
 
     // Updates user profile and return the updated UserResponse DTO
@@ -43,21 +89,27 @@ public class UserService : IUserService
             throw new KeyNotFoundException("User not found.");
         }
 
-        // Updates the entity fields with the request data
-        user.UserName =request.userName;
+        user.UserName = request.userName;
         user.Email = request.Email;
+        user.ProfileImageUrl = request.ProfileImageUrl;
+        user.Bio = request.Bio;
 
-        // Saves changes to the #pragma warning disable format
         await _userRepository.UpdateAsync(user);
 
-        // Converts the entity back to DTO and returns
+        var followersCount = await _followRepository.GetFollowersCountAsync(user.Id);
+        var followingCount = await _followRepository.GetFollowingCountAsync(user.Id);
+
         return new UserResponse
         {
             Id = user.Id,
             UserName = user.UserName,
             Email = user.Email,
             Role = user.Role,
-            CreatedAt = user.CreatedAt
+            CreatedAt = user.CreatedAt,
+            ProfileImageUrl = user.ProfileImageUrl,
+            Bio = user.Bio,
+            FollowersCount = followersCount,
+            FollowingCount = followingCount
         };
     }
 }

@@ -22,11 +22,34 @@ public class PostController : ControllerBase
     }
 
     // GET api/post — public, returns all posts with like info for the current user
+    // Supports ?search=texto, ?tag=csharp, ?page=1&pageSize=20 query params
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+        [FromQuery] string? search,
+        [FromQuery] string? tag,
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         int? currentUserId = userIdClaim != null ? int.Parse(userIdClaim.Value) : null;
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var results = await _postService.SearchAsync(search, currentUserId);
+            return Ok(results);
+        }
+
+        if (!string.IsNullOrWhiteSpace(tag))
+        {
+            var results = await _postService.GetByTagAsync(tag, currentUserId);
+            return Ok(results);
+        }
+
+        if (page.HasValue)
+        {
+            var paged = await _postService.GetAllPagedAsync(page.Value, pageSize ?? 20, currentUserId);
+            return Ok(paged);
+        }
 
         var posts = await _postService.GetAllAsync(currentUserId);
         return Ok(posts);

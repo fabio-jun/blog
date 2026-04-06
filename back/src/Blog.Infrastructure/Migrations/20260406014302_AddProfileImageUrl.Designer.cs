@@ -3,6 +3,7 @@ using System;
 using Blog.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260406014302_AddProfileImageUrl")]
+    partial class AddProfileImageUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,24 +24,6 @@ namespace Blog.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Blog.Domain.Entities.Bookmark", b =>
-                {
-                    b.Property<int>("PostId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("PostId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Bookmarks");
-                });
 
             modelBuilder.Entity("Blog.Domain.Entities.Comment", b =>
                 {
@@ -218,10 +203,6 @@ namespace Blog.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Bio")
-                        .HasMaxLength(160)
-                        .HasColumnType("character varying(160)");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -263,25 +244,6 @@ namespace Blog.Infrastructure.Migrations
                         .HasDatabaseName("IX_Users_UserName");
 
                     b.ToTable("Users", (string)null);
-                });
-
-            modelBuilder.Entity("Blog.Domain.Entities.Bookmark", b =>
-                {
-                    b.HasOne("Blog.Domain.Entities.Post", "Post")
-                        .WithMany("Bookmarks")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Blog.Domain.Entities.User", "User")
-                        .WithMany("Bookmarks")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Blog.Domain.Entities.Comment", b =>
@@ -384,8 +346,6 @@ namespace Blog.Infrastructure.Migrations
 
             modelBuilder.Entity("Blog.Domain.Entities.Post", b =>
                 {
-                    b.Navigation("Bookmarks");
-
                     b.Navigation("Comments");
 
                     b.Navigation("Likes");
@@ -400,8 +360,6 @@ namespace Blog.Infrastructure.Migrations
 
             modelBuilder.Entity("Blog.Domain.Entities.User", b =>
                 {
-                    b.Navigation("Bookmarks");
-
                     b.Navigation("Comments");
 
                     b.Navigation("Followers");

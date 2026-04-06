@@ -34,6 +34,25 @@ public class UserRepository : IUserRepository
         return await _context.Users.FirstOrDefaultAsync(u => u.Email == Email);
     }
 
+    // Searches users by username
+    public async Task<IEnumerable<User>> SearchAsync(string query)
+    {
+        return await _context.Users
+            .Where(u => EF.Functions.ILike(u.UserName, $"%{query}%"))
+            .ToListAsync();
+    }
+
+    // Returns users that the given user does not follow
+    public async Task<IEnumerable<User>> GetSuggestedAsync(int userId, int count)
+    {
+        return await _context.Users
+            .Where(u => u.Id != userId
+                && !_context.Follows.Any(f => f.FollowerId == userId && f.FollowingId == u.Id))
+            .OrderBy(u => Guid.NewGuid())
+            .Take(count)
+            .ToListAsync();
+    }
+
     // Converts the query into a list and return all users
     public async Task<IEnumerable<User>> GetAllAsync()
     {

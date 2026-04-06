@@ -32,6 +32,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(20)
             .HasDefaultValue("User");
 
+        builder.Property(u => u.Bio)
+            .HasMaxLength(160);
+
         builder.Property(u => u.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("CURRENT_TIMESTAMP");

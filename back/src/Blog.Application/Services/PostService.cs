@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Blog.Domain.Entities;
 using Blog.Domain.Interfaces;
+using Blog.Application.DTOs;
 using Blog.Application.DTOs.Posts;
 using Blog.Application.Interfaces;
 
@@ -12,13 +13,16 @@ public class PostService : IPostService
     private readonly IPostRepository _postRepository;
     private readonly ITagRepository _tagRepository;
     private readonly ILikeRepository _likeRepository;
+    private readonly IBookmarkRepository _bookmarkRepository;
 
     // Constructor: DI
-    public PostService(IPostRepository postRepository, ITagRepository tagRepository, ILikeRepository likeRepository)
+    public PostService(IPostRepository postRepository, ITagRepository tagRepository,
+        ILikeRepository likeRepository, IBookmarkRepository bookmarkRepository)
     {
         _postRepository = postRepository;
         _tagRepository = tagRepository;
         _likeRepository = likeRepository;
+        _bookmarkRepository = bookmarkRepository;
     }
 
     // Returns all posts (most recent first), with like info for the current user
@@ -37,10 +41,133 @@ public class PostService : IPostService
                 UpdatedAt = post.UpdatedAt,
                 AuthorId = post.AuthorId,
                 AuthorName = post.Author?.UserName ?? string.Empty,
+                AuthorProfileImageUrl = post.Author?.ProfileImageUrl,
                 ImageUrl = post.ImageUrl,
                 LikeCount = await _likeRepository.GetCountByPostIdAsync(post.Id),
                 HasLiked = currentUserId.HasValue
-                    && await _likeRepository.GetAsync(post.Id, currentUserId.Value) != null
+                    && await _likeRepository.GetAsync(post.Id, currentUserId.Value) != null,
+                HasBookmarked = currentUserId.HasValue
+                    && await _bookmarkRepository.GetAsync(post.Id, currentUserId.Value) != null
+            });
+        }
+
+        return responses;
+    }
+
+    // Returns paginated posts
+    public async Task<PagedResponse<PostResponse>> GetAllPagedAsync(int page, int pageSize, int? currentUserId = null)
+    {
+        var (posts, totalCount) = await _postRepository.GetAllPagedAsync(page, pageSize);
+        var responses = new List<PostResponse>();
+
+        foreach (var post in posts)
+        {
+            responses.Add(new PostResponse
+            {
+                Id = post.Id,
+                Content = post.Content,
+                CreatedAt = post.CreatedAt,
+                UpdatedAt = post.UpdatedAt,
+                AuthorId = post.AuthorId,
+                AuthorName = post.Author?.UserName ?? string.Empty,
+                AuthorProfileImageUrl = post.Author?.ProfileImageUrl,
+                ImageUrl = post.ImageUrl,
+                LikeCount = await _likeRepository.GetCountByPostIdAsync(post.Id),
+                HasLiked = currentUserId.HasValue
+                    && await _likeRepository.GetAsync(post.Id, currentUserId.Value) != null,
+                HasBookmarked = currentUserId.HasValue
+                    && await _bookmarkRepository.GetAsync(post.Id, currentUserId.Value) != null
+            });
+        }
+
+        return new PagedResponse<PostResponse>
+        {
+            Items = responses,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
+    }
+
+    // Searches posts by content
+    public async Task<IEnumerable<PostResponse>> SearchAsync(string query, int? currentUserId = null)
+    {
+        var posts = await _postRepository.SearchAsync(query);
+        var responses = new List<PostResponse>();
+
+        foreach (var post in posts)
+        {
+            responses.Add(new PostResponse
+            {
+                Id = post.Id,
+                Content = post.Content,
+                CreatedAt = post.CreatedAt,
+                UpdatedAt = post.UpdatedAt,
+                AuthorId = post.AuthorId,
+                AuthorName = post.Author?.UserName ?? string.Empty,
+                AuthorProfileImageUrl = post.Author?.ProfileImageUrl,
+                ImageUrl = post.ImageUrl,
+                LikeCount = await _likeRepository.GetCountByPostIdAsync(post.Id),
+                HasLiked = currentUserId.HasValue
+                    && await _likeRepository.GetAsync(post.Id, currentUserId.Value) != null,
+                HasBookmarked = currentUserId.HasValue
+                    && await _bookmarkRepository.GetAsync(post.Id, currentUserId.Value) != null
+            });
+        }
+
+        return responses;
+    }
+
+    // Returns posts filtered by tag
+    public async Task<IEnumerable<PostResponse>> GetByTagAsync(string tagName, int? currentUserId = null)
+    {
+        var posts = await _postRepository.GetByTagAsync(tagName);
+        var responses = new List<PostResponse>();
+
+        foreach (var post in posts)
+        {
+            responses.Add(new PostResponse
+            {
+                Id = post.Id,
+                Content = post.Content,
+                CreatedAt = post.CreatedAt,
+                UpdatedAt = post.UpdatedAt,
+                AuthorId = post.AuthorId,
+                AuthorName = post.Author?.UserName ?? string.Empty,
+                AuthorProfileImageUrl = post.Author?.ProfileImageUrl,
+                ImageUrl = post.ImageUrl,
+                LikeCount = await _likeRepository.GetCountByPostIdAsync(post.Id),
+                HasLiked = currentUserId.HasValue
+                    && await _likeRepository.GetAsync(post.Id, currentUserId.Value) != null,
+                HasBookmarked = currentUserId.HasValue
+                    && await _bookmarkRepository.GetAsync(post.Id, currentUserId.Value) != null
+            });
+        }
+
+        return responses;
+    }
+
+    // Returns posts from users the authenticated user follows
+    public async Task<IEnumerable<PostResponse>> GetFeedAsync(int userId)
+    {
+        var posts = await _postRepository.GetFeedAsync(userId);
+        var responses = new List<PostResponse>();
+
+        foreach (var post in posts)
+        {
+            responses.Add(new PostResponse
+            {
+                Id = post.Id,
+                Content = post.Content,
+                CreatedAt = post.CreatedAt,
+                UpdatedAt = post.UpdatedAt,
+                AuthorId = post.AuthorId,
+                AuthorName = post.Author?.UserName ?? string.Empty,
+                AuthorProfileImageUrl = post.Author?.ProfileImageUrl,
+                ImageUrl = post.ImageUrl,
+                LikeCount = await _likeRepository.GetCountByPostIdAsync(post.Id),
+                HasLiked = await _likeRepository.GetAsync(post.Id, userId) != null,
+                HasBookmarked = await _bookmarkRepository.GetAsync(post.Id, userId) != null
             });
         }
 
