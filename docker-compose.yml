@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: yap_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: blogdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - yap-net
+
+  api:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: yap_api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=blogdb;Username=postgres;Password=postgres
+      - Jwt__Key=BlogSuperSecretKeyDev2026!@#$$MuitoSegura99
+      - Jwt__Issuer=BlogAPI
+      - Jwt__Audience=BlogClient
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    volumes:
+      - uploads_data:/app/wwwroot/uploads
+    networks:
+      - yap-net
+
+  client:
+    build:
+      context: ./front/client
+      dockerfile: Dockerfile
+    container_name: yap_client
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - yap-net
+
+networks:
+  yap-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  uploads_data:

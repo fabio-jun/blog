@@ -5,6 +5,8 @@
 
 # dotenv files
 .env
+.env.*
+!.env.example
 
 # User-specific files
 *.rsuser
@@ -483,10 +485,14 @@ $RECYCLE.BIN/
 
 # App settings                                                                                                                  
 **/appsettings*.json                                                                                                                                                                                                                                              
-# Project docs                                                                                                                  
-CLAUDE.md       
-PLANO.md
-Teste.md
+# Markdown docs
+*.md
 
 # Claude Code settings
 .claude/settings.local.json
+
+# Uploads (user-generated content)
+**/uploads/
+
+# Docker volumes
+**/pgdata/

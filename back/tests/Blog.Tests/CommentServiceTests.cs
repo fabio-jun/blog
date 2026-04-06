@@ -21,7 +21,7 @@ public class CommentServiceTests
     {
         var comments = new List<Comment>
         {
-            new() { Id = 1, Content = "Nice post!", PostId = 1, AuthorId = 2, Author = new User { Id = 2, UserName = "commenter", Email = "c@t.com", PasswordHash = "h", Role = "User" }, CreatedAt = DateTime.UtcNow }
+            new() { Id = 1, Content = "Nice post", PostId = 1, AuthorId = 2, Author = new User { Id = 2, UserName = "commenter", Email = "c@t.com", PasswordHash = "h", Role = "User" }, CreatedAt = DateTime.UtcNow }
         };
         _commentRepository.GetByPostIdAsync(1).Returns(comments);
 
@@ -35,13 +35,13 @@ public class CommentServiceTests
     [Fact]
     public async Task CreateAsync_CreatesAndReturnsCommentResponse()
     {
-        var request = new CreateCommentRequest { Content = "Great yap!" };
+        var request = new CreateCommentRequest { Content = "Great yap" };
 
         var result = await _sut.CreateAsync(1, request, 2);
 
-        Assert.Equal("Great yap!", result.Content);
+        Assert.Equal("Great yap", result.Content);
         Assert.Equal(2, result.AuthorId);
-        await _commentRepository.Received(1).AddAsync(Arg.Is<Comment>(c => c.Content == "Great yap!" && c.PostId == 1 && c.AuthorId == 2));
+        await _commentRepository.Received(1).AddAsync(Arg.Is<Comment>(c => c.Content == "Great yap" && c.PostId == 1 && c.AuthorId == 2));
     }
 
     [Fact]

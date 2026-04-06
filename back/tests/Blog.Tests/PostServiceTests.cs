@@ -24,7 +24,7 @@ public class PostServiceTests
     {
         var posts = new List<Post>
         {
-            new() { Id = 1, Content = "Hello", AuthorId = 1, Author = new User { Id = 1, UserName = "user1", Email = "u1@test.com", PasswordHash = "h", Role = "User" }, CreatedAt = DateTime.UtcNow }
+            new() { Id = 1, Content = "Hello World", AuthorId = 1, Author = new User { Id = 1, UserName = "user1", Email = "u1@test.com", PasswordHash = "h", Role = "User" }, CreatedAt = DateTime.UtcNow }
         };
         _postRepository.GetAllAsync().Returns(posts);
         _likeRepository.GetCountByPostIdAsync(1).Returns(5);
@@ -33,7 +33,7 @@ public class PostServiceTests
         var result = (await _sut.GetAllAsync(10)).ToList();
 
         Assert.Single(result);
-        Assert.Equal("Hello", result[0].Content);
+        Assert.Equal("Hello World", result[0].Content);
         Assert.Equal(5, result[0].LikeCount);
         Assert.True(result[0].HasLiked);
     }
@@ -43,7 +43,7 @@ public class PostServiceTests
     {
         var posts = new List<Post>
         {
-            new() { Id = 1, Content = "Hello", AuthorId = 1, Author = new User { Id = 1, UserName = "user1", Email = "u1@test.com", PasswordHash = "h", Role = "User" }, CreatedAt = DateTime.UtcNow }
+            new() { Id = 1, Content = "Hello World", AuthorId = 1, Author = new User { Id = 1, UserName = "user1", Email = "u1@test.com", PasswordHash = "h", Role = "User" }, CreatedAt = DateTime.UtcNow }
         };
         _postRepository.GetAllAsync().Returns(posts);
         _likeRepository.GetCountByPostIdAsync(1).Returns(0);
@@ -106,14 +106,14 @@ public class PostServiceTests
     [Fact]
     public async Task CreateAsync_WithHashtags_ExtractsAndSavesTags()
     {
-        var request = new CreatePostRequest { Content = "Hello #csharp #dotnet" };
-        _tagRepository.GetByNameAsync("csharp").Returns((Tag?)null);
-        _tagRepository.GetByNameAsync("dotnet").Returns((Tag?)null);
+        var request = new CreatePostRequest { Content = "Hello #hashtag #test" };
+        _tagRepository.GetByNameAsync("hashtag").Returns((Tag?)null);
+        _tagRepository.GetByNameAsync("test").Returns((Tag?)null);
 
         await _sut.CreateAsync(request, 1);
 
-        await _tagRepository.Received(1).AddAsync(Arg.Is<Tag>(t => t.Name == "csharp"));
-        await _tagRepository.Received(1).AddAsync(Arg.Is<Tag>(t => t.Name == "dotnet"));
+        await _tagRepository.Received(1).AddAsync(Arg.Is<Tag>(t => t.Name == "hashtag"));
+        await _tagRepository.Received(1).AddAsync(Arg.Is<Tag>(t => t.Name == "test"));
     }
 
     [Fact]
@@ -187,12 +187,12 @@ public class PostServiceTests
     {
         var posts = new List<Post>
         {
-            new() { Id = 1, Content = "#csharp rocks", AuthorId = 1, Author = new User { Id = 1, UserName = "u", Email = "e", PasswordHash = "h", Role = "User" } }
+            new() { Id = 1, Content = "#test one", AuthorId = 1, Author = new User { Id = 1, UserName = "u", Email = "e", PasswordHash = "h", Role = "User" } }
         };
-        _postRepository.GetByTagAsync("csharp").Returns(posts);
+        _postRepository.GetByTagAsync("test").Returns(posts);
         _likeRepository.GetCountByPostIdAsync(1).Returns(2);
 
-        var result = (await _sut.GetByTagAsync("csharp")).ToList();
+        var result = (await _sut.GetByTagAsync("test")).ToList();
 
         Assert.Single(result);
         Assert.Equal(2, result[0].LikeCount);
