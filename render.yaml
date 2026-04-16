@@ -1,0 +1,34 @@
+services:
+  - type: keyvalue
+    name: yap-redis
+    region: oregon
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
+
+  - type: web
+    name: yap-api
+    runtime: docker
+    dockerfilePath: ./yap-api/Dockerfile
+    dockerContext: ./yap-api
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Jwt__Key
+        sync: false
+      - key: Jwt__Issuer
+        value: BlogAPI
+      - key: Jwt__Audience
+        value: BlogClient
+      - key: REDIS__CONNECTION
+        fromService:
+          type: keyvalue
+          name: yap-redis
+          property: connectionString
+      - key: Cors__AllowedOrigins__0
+        sync: false
