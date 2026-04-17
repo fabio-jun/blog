@@ -4,7 +4,7 @@ services:
     container_name: yap_postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your local .env}
       POSTGRES_DB: blogdb
     ports:
       - "5432:5432"
@@ -35,12 +35,12 @@ services:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=blogdb;Username=postgres;Password=postgres
-      - Jwt__Key=BlogSuperSecretKeyDev2026!@#$$MuitoSegura99
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=blogdb;Username=postgres;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your local .env}
+      - Jwt__Key=${JWT_KEY:?Set JWT_KEY in your local .env with a long random signing key}
       - Jwt__Issuer=BlogAPI
       - Jwt__Audience=BlogClient
       - Swagger__Enabled=true
-      - Cloudinary__Url=cloudinary://121235649956182:zwfENOjKOiSedqPk6EDBQ0s702o@df8zziybd
+      - Cloudinary__Url=${CLOUDINARY_URL:?Set CLOUDINARY_URL in your local .env with the rotated Cloudinary URL}
       - REDIS__CONNECTION=redis:6379
     depends_on:
       postgres:
