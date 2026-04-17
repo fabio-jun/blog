@@ -32,7 +32,6 @@ Blog.Domain        -- Entities, repository interfaces
 Blog.Infrastructure -- EF Core, repositories, migrations, seeder
 ```
 
-Recent backend modules include notifications, re-yaps, reports, blocks, direct messages, bookmarks, follows, likes, comments, tags, users, uploads, and Redis cache support.
 
 ## Getting Started
 
