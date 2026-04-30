@@ -2,7 +2,7 @@
 
 A full-stack social network inspired by Twitter/X. Users create short posts (yaps), follow others, like, comment, bookmark, re-yap, use hashtags and mentions, upload media, receive notifications, report content, block users, and send direct messages.
 
-Current public deployment is on Vercel + Render. The migration target in this repo is Azure Static Web Apps + Azure Container Apps + Azure Database for PostgreSQL + Azure Blob Storage.
+The migration target in this repo is Azure Static Web Apps + Azure Container Apps + Azure Database for PostgreSQL + Azure Blob Storage.
 
 ## Monorepo changed to multirepo
 
